@@ -22,8 +22,8 @@ It is one Python file with no dependencies beyond the standard library.
 - Docker with Compose
 - A Telegram bot token from [@BotFather](https://t.me/BotFather), and your chat ID
 - At least one data source:
-  - **LTA DataMall:** a free [account key](https://datamall.lta.gov.sg)
-  - **Charge+:** your own Charge+ account, plus the API key its app sends (see below)
+  - **LTA DataMall**, for public chargers from any operator, including public Charge+ sites: a free [account key](https://datamall.lta.gov.sg)
+  - **Charge+**, for private chargers: your own Charge+ account, plus the API key its app sends (see below)
 
 ## Setup
 
@@ -46,6 +46,8 @@ Your bot will send you a help message when it starts. Send `/find`, `/add` and `
 
 ### Charge+ setup
 
+**You only need this for private Charge+ chargers.** Public chargers, including public Charge+ sites, are available through LTA DataMall without any capture step. If you only want public chargers, skip this section and set `USE_CHARGEPLUS=false`.
+
 Set these in `.env`:
 
 - `CHARGEPLUS_PHONE`
@@ -53,8 +55,6 @@ Set these in `.env`:
 - `CHARGEPLUS_API_KEY`
 
 `CHARGEPLUS_API_KEY` is the value of the `x-api-key` header the Charge+ app sends when it signs in, and it's the only value you need to capture. Capture it once from your own device. The app is built with Flutter, which ignores the phone's Wi-Fi proxy setting, so you need a VPN-based capture tool. Only do this for your own account.
-
-If you only want LTA data, set `USE_CHARGEPLUS=false`.
 
 ## Telegram commands
 
