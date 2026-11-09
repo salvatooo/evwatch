@@ -1,0 +1,9 @@
+# Credentials and runtime data: never commit these
+.env
+data/
+backups/
+
+__pycache__/
+*.pyc
+*.new
+.DS_Store

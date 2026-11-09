@@ -1,0 +1,10 @@
+services:
+  evwatch:
+    image: python:3.12-alpine
+    container_name: evwatch
+    restart: unless-stopped
+    command: ["python", "-u", "/app/evwatch.py"]
+    env_file: .env
+    volumes:
+      - ./evwatch.py:/app/evwatch.py:ro
+      - ./data:/data
