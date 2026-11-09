@@ -1,8 +1,0 @@
-{
-  "x-api-key": "YOUR_X_API_KEY",
-  "x-api-token": "YOUR_X_API_TOKEN",
-  "build-number": "YOUR_APP_BUILD_NUMBER",
-  "platform": "ios",
-  "user-agent": "YOUR_APP_USER_AGENT",
-  "content-type": "application/json"
-}

@@ -68,7 +68,7 @@ class Config:
         # Charge+ app API (for private chargers not in LTA's feed)
         self.cp_url = _env("CHARGEPLUS_URL")
         self.cp_method = _env("CHARGEPLUS_METHOD", "GET").upper()
-        self.cp_headers_file = _env("CHARGEPLUS_HEADERS_FILE", "/data/chargeplus_headers.json")
+        self.cp_api_key = _env("CHARGEPLUS_API_KEY")                # x-api-key header sent by the Charge+ app
         self.cp_body = _env("CHARGEPLUS_BODY")                      # raw JSON body, if the call is a POST
         # Auto-login (keeps the 48h access token fresh). Leave password empty to use a pasted token.
         self.cp_login_url = _env("CHARGEPLUS_LOGIN_URL", "https://api.chargeplus.co/api/v1/auth/login")
@@ -80,7 +80,7 @@ class Config:
             with open(pw_file) as f:
                 self.cp_password = f.read().strip()
         self.cp_token_file = _env("CHARGEPLUS_TOKEN_FILE", "/data/chargeplus_token.json")
-        self.cp_auth = _env("CHARGEPLUS_AUTH", "login").lower()     # login | header | none
+        self.cp_auth = _env("CHARGEPLUS_AUTH", "login").lower()     # login | none
         self.notify_finishing = _env("NOTIFY_ON_FINISHING", "true").lower() == "true"
 
 
@@ -195,13 +195,10 @@ def cp_status(s):
 
 
 def _cp_base_headers(cfg):
-    try:
-        with open(cfg.cp_headers_file) as f:
-            headers = json.load(f)
-    except FileNotFoundError:
-        headers = {}
-    # urllib can't decode gzip/br; drop it so the server sends plain JSON
-    return {k: v for k, v in headers.items() if k.lower() != "accept-encoding"}
+    headers = {"accept": "application/json"}
+    if cfg.cp_api_key:
+        headers["x-api-key"] = cfg.cp_api_key  # the only app header Charge+ requires, and only for login
+    return headers
 
 
 def _cp_set_auth(headers, token):
@@ -216,7 +213,7 @@ def cp_login(cfg, headers):
     try:
         res = (http_json(cfg.cp_login_url, h, data=body) or {}).get("result") or {}
     except urllib.error.HTTPError as e:
-        raise AuthExpired(f"Charge+ login failed ({e.code}) — check phone/password.") from e
+        raise AuthExpired(f"Charge+ login failed ({e.code}) — check your phone, password and CHARGEPLUS_API_KEY.") from e
     token = res.get("token")
     if not token:
         raise AuthExpired("Charge+ login returned no token.")
@@ -287,7 +284,7 @@ def fetch_chargeplus(cfg, url):
             if auto:
                 raise AuthExpired("Charge+ session was taken over (the phone app probably signed in). "
                                   "Send /arm to let evwatch sign back in.") from e
-            raise AuthExpired(f"Charge+ returned {e.code} — token expired or app headers changed?") from e
+            raise AuthExpired(f"Charge+ returned {e.code} — check your Charge+ settings.") from e
         if e.code == 429:
             log.warning("Charge+ rate-limited us (429); backing off")
             time.sleep(300)
@@ -723,8 +720,7 @@ class Watcher:
             except AuthExpired as e:  # the session is account-wide, so stop this cycle
                 log.warning("%s", e)
                 if not self.auth_alerted:
-                    self.notifier.send(f"🔑 {e} Re-capture the request headers from the Charge+ app "
-                                       f"and update {self.cfg.cp_headers_file}.")
+                    self.notifier.send(f"🔑 {e}")
                     self.auth_alerted = True
                 return
             except Exception as e:  # noqa: BLE001

@@ -23,7 +23,7 @@ It is one Python file with no dependencies beyond the standard library.
 - A Telegram bot token from [@BotFather](https://t.me/BotFather), and your chat ID
 - At least one data source:
   - **LTA DataMall:** a free [account key](https://datamall.lta.gov.sg)
-  - **Charge+:** your own Charge+ account, plus the request headers your own app sends (see below)
+  - **Charge+:** your own Charge+ account, plus the API key its app sends (see below)
 
 ## Setup
 
@@ -46,15 +46,13 @@ Your bot will send you a help message when it starts. Send `/find`, `/add` and `
 
 ### Charge+ setup
 
-Set `CHARGEPLUS_PHONE`, and either `CHARGEPLUS_PASSWORD` or `CHARGEPLUS_PASSWORD_FILE`, in `.env`.
+Set these in `.env`:
 
-Charge+ also expects the headers its app sends. Capture them from your own device, then:
+- `CHARGEPLUS_PHONE`
+- `CHARGEPLUS_PASSWORD`, or `CHARGEPLUS_PASSWORD_FILE`
+- `CHARGEPLUS_API_KEY`
 
-```bash
-cp chargeplus_headers.example.json data/chargeplus_headers.json
-```
-
-Replace the placeholder values in that file with your own. The app is built with Flutter, which ignores the phone's Wi-Fi proxy setting, so you need a VPN-based capture tool. Only do this for your own account.
+`CHARGEPLUS_API_KEY` is the value of the `x-api-key` header the Charge+ app sends when it signs in, and it's the only value you need to capture. Capture it once from your own device. The app is built with Flutter, which ignores the phone's Wi-Fi proxy setting, so you need a VPN-based capture tool. Only do this for your own account.
 
 If you only want LTA data, set `USE_CHARGEPLUS=false`.
 
@@ -95,7 +93,7 @@ Everything is set in `.env`. See [`.env.example`](.env.example) for the full lis
 | `CHARGEPLUS_PHONE_IDD` | `+65` | Country code for that number |
 | `CHARGEPLUS_PASSWORD` | | Charge+ account password |
 | `CHARGEPLUS_PASSWORD_FILE` | | Read the password from a file instead |
-| `CHARGEPLUS_HEADERS_FILE` | `/data/chargeplus_headers.json` | Captured app headers |
+| `CHARGEPLUS_API_KEY` | | The app's `x-api-key` value, needed to sign in |
 | `CHARGEPLUS_URL` | | Optional comma-separated status URLs for the first start |
 | `POLL_SECONDS` | `120` | Default polling interval, with a minimum of 120 |
 | `MODE` | `manual` | `manual` uses `/arm`; `always` watches every location |
