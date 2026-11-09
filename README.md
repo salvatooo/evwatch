@@ -126,3 +126,7 @@ After changing `.env`, recreate the container instead:
 ```bash
 docker compose up -d
 ```
+
+## License
+
+[MIT](LICENSE)
